@@ -2,18 +2,21 @@ import adafruit_ahtx0
 import board
 import time
 import curses
-from curses import wrapper
+
 
 # Setup I2C Sensor
 sensor = adafruit_ahtx0.AHTx0(board.I2C())
+
 
 # Returns the temperature in celsius
 def get_temperature():
     return round(sensor.temperature, 1)
 
+
 # Returns the humidity in percentage
 def get_humidity():
     return round(sensor.relative_humidity, 1)
+
 
 # Poll the fan controller. If the fans are off, turn them on
 # 🍃
@@ -21,10 +24,12 @@ def turn_on_fans():
     pass
     #click.echo("Turning on the fans")
 
+
 # Poll the fan controller. If the fans are on, turn them off
 def turn_off_fans():
     pass
     #click.echo("Turning off the fans")
+
 
 # Poll the humidifier controller. If the humidifier is off, turn it on
 # 🌧️
@@ -32,10 +37,12 @@ def turn_on_humidifier():
     pass
     #click.echo("Turning on the humidifier")
 
+
 # Poll the humidifier controller. If the humidifier is on, turn it off
 def turn_off_humidifier():
     pass
     #click.echo("Turning off the humidifier")
+
 
 # Poll the heater controller. If the heater is off, turn it on
 # 🔥
@@ -43,10 +50,12 @@ def turn_on_heater():
     pass
     #click.echo("Turning on the heater")
 
+
 # Poll the heater controller. If the heater is on, turn it off
 def turn_off_heater():
     pass
     #click.echo("Turning off the heater")
+
 
 class Stats:
     def __init__(self, temperature, humidity, temperature_status, humidity_status, min_temp, max_temp, min_humidity, max_humidity):
@@ -62,17 +71,21 @@ class Stats:
         self.heater_on = False
         self.humidifier_on = False
 
+
     # Adjust min_temp by +/- 1
     def adjust_min_temp(self, value):
         self.min_temp += value
+
 
     # Adjust max_temp by +/- 1
     def adjust_max_temp(self, value):
         self.max_temp += value
 
+
     # Adjust min_humidity by +/- 1
     def adjust_min_humidity(self, value):
         self.min_humidity += value
+
 
     # Adjust max_humidity by +/- 1
     def adjust_max_humidity(self, value):
@@ -83,12 +96,12 @@ class Stats:
 def display_console(win, stats: Stats):
     win.clear()
 
-    win.addstr(0, 0, "       ~ MycoKeeper ~       ")
-    win.addstr(1, 0, "----------------------------")
-    win.addstr(2, 0, f"Temperature Range: {stats.min_temp}c - {stats.max_temp}c")
-    win.addstr(3, 0, f"Humidity Range: {stats.min_humidity}% - {stats.max_humidity}%")
-    win.addstr(4, 0, f"Temperature: {stats.temperature}c ({stats.temperature_status})")
-    win.addstr(5, 0, f"Humidity: {stats.humidity}% ({stats.humidity_status})")
+    win.addstr(1, 0, "       ~ MycoKeeper ~       ")
+    win.addstr(2, 0, "____________________________")
+    win.addstr(4, 0, f"Temperature Range: {stats.min_temp}c - {stats.max_temp}c")
+    win.addstr(5, 0, f"Humidity Range: {stats.min_humidity}% - {stats.max_humidity}%")
+    win.addstr(6, 0, f"Temperature: {stats.temperature}c ({stats.temperature_status})")
+    win.addstr(7, 0, f"Humidity: {stats.humidity}% ({stats.humidity_status})")
     
     s = []
     if stats.fans_on:
@@ -98,14 +111,19 @@ def display_console(win, stats: Stats):
     if stats.humidifier_on:
         s.append("🌧️ ")
     if not stats.fans_on and not stats.heater_on and not stats.humidifier_on:
+        if stats.temperature_status == "optimal":
+            s.append("🌈 ")
+        if stats.humidity_status == "optimal":
+            s.append("✨")
         s.append("🍄 ")
 
-    centered_text_pos = (28 - len(s)) // 2 #hard coding 28 here because of the width of the other text
-    win.addstr(7, centered_text_pos, "".join(s))
+    centered_text_pos = (28 - len(s)) // 2 #hard coding 28 here because of the width of the other text. Replace this when you've got the li'l scren going
+    win.addstr(9, centered_text_pos, "".join(s))
     
     win.noutrefresh()
 
     curses.doupdate()
+
 
 # Terminate the curses window
 def terminate(screen):
@@ -131,7 +149,7 @@ def MycoKeeper(screen):
         last_time = start_time
             
         # Define the temperature and humidity ranges
-        stats = Stats(0, 0, "normal", "normal", 21, 30, 80, 100)
+        stats = Stats(0, 0, "normal", "normal", 20, 26, 80, 95)
         optimal_temp = stats.min_temp + stats.max_temp / 2
         optimal_humidity = stats.min_humidity + stats.max_humidity / 2
 
